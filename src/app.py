@@ -7,6 +7,8 @@ from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush, QIcon
 from core.paths import ROOTDIR
 from core.io import parse_rengoku_data
 from core.excel import create_excel_from_bin, export_excel_to_bin
+from core.mhfdat_io import parse_mhfdat
+from ui.monster_points_editor import MonsterPointsEditor
 from ui.styles import app_stylesheet
 from ui.dialogs import InAppEditor, ModeChooser
 
@@ -52,6 +54,15 @@ class RengokuWindow(QMainWindow):
         self.load_button.clicked.connect(self.load_rengoku_data)
         column.addWidget(self.load_button, 0, Qt.AlignHCenter)
 
+        self.load_mhfdat_button = QPushButton("Load Mhfdat Data", self)
+        self.load_mhfdat_button.clicked.connect(self.load_mhfdat_data)
+        column.addWidget(self.load_mhfdat_button, 0, Qt.AlignHCenter)
+
+        self.edit_points_button = QPushButton("Edit Monster Points", self)
+        self.edit_points_button.clicked.connect(self.open_monster_points_editor)
+        self.edit_points_button.setEnabled(False)
+        column.addWidget(self.edit_points_button, 0, Qt.AlignHCenter)
+
         self.export_button = QPushButton("Export to Excel", self)
         self.export_button.clicked.connect(self.export_to_excel)
         column.addWidget(self.export_button, 0, Qt.AlignHCenter)
@@ -72,6 +83,28 @@ class RengokuWindow(QMainWindow):
 
         for w in [self.export_button, self.import_button, self.editor_button]:
             w.setEnabled(False)
+
+    def load_mhfdat_data(self):
+        file_path, _ = QFileDialog.getOpenFileName(self, "Open mhfdat File", "", "Binary Files (*.bin)")
+        if not file_path:
+            return
+        try:
+            self.mhfdat_parsed = parse_mhfdat(file_path)
+            self.mhfdat_path = file_path
+            QMessageBox.information(self, "Success", "mhfdat data loaded successfully!")
+            self.edit_points_button.setEnabled(True)
+        except Exception as e:
+            QMessageBox.critical(self, "Error", f"Failed to parse mhfdat:\n{e}")
+            self.edit_points_button.setEnabled(False)
+
+    def open_monster_points_editor(self):
+        if not hasattr(self, "mhfdat_parsed"):
+            QMessageBox.warning(self, "Error", "No mhfdat data loaded!")
+            return
+        dlg = MonsterPointsEditor(self.mhfdat_path, self.mhfdat_parsed, self)
+        dlg.exec()
+
+
 
     def open_help(self):
         msg = QMessageBox(self)
