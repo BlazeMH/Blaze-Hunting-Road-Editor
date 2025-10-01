@@ -3,7 +3,7 @@ def app_stylesheet() -> str:
     return """
 QPushButton {
     background-color: #1c0c29;
-    color: white;
+    color: cyan;
     padding: 10px 20px;
     border: 1px solid #4CA;
     border-radius: 8px;

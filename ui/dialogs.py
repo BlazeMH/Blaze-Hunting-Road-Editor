@@ -17,7 +17,7 @@ class InAppEditor(QDialog):
     def __init__(self, structs, rengoku_path, mode:str, parent=None):
         super().__init__(parent)
         self.setModal(True)
-        self.setWindowTitle(f"In-App Editor — {'Multi' if mode=='multi' else 'Solo'}")
+        self.setWindowTitle(f"In-App Editor — {'Multi Road' if mode=='multi' else 'Solo Road'}")
         self.resize(980, 680)
         self.setWindowFlags(
             Qt.Window |
@@ -31,7 +31,7 @@ class InAppEditor(QDialog):
         self.mode = mode
 
         # Background with lower opacity so tables are readable
-        self.bakimg = QPixmap(str(ROOTDIR / "./asset/bg.png"))
+        self.bakimg = QPixmap(str(ROOTDIR / "./asset/bg2.jpg"))
         if not self.bakimg.isNull():
             self.bakimg = self.bakimg.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             tmp = QPixmap(self.bakimg.size())
@@ -46,7 +46,8 @@ class InAppEditor(QDialog):
 
         layout = QVBoxLayout(self)
 
-        header = QLabel(f"In-App Editor — {'Multi' if mode=='multi' else 'Solo'}", self)
+        header = QLabel(f"In-App Editor — {'Multi Road' if mode=='multi' else 'Solo Road'}", self)
+        header.setStyleSheet("color: cyan; font-size: 18px; font-weight: bold;")
         header.setAlignment(Qt.AlignCenter)
         header.setProperty("class", "header")
         layout.addWidget(header)

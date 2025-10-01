@@ -41,6 +41,31 @@ class DataCounters:
 def _read_u32_le(buf: bytes, off: int) -> int:
     return struct.unpack_from('<I', buf, off)[0]
 
+def _pad_to_alignment(buf: bytearray, align: int) -> int:
+    """Pad buf with 0x00 so len(buf) becomes a multiple of 'align'. Returns bytes added."""
+    if align <= 1:
+        return 0
+    pad = (-len(buf)) & (align - 1)  # works for power-of-two aligns
+    if pad:
+        buf += b"\x00" * pad
+    return pad
+
+def _build_monster_block(rows) -> bytes:
+    """Serialize rows -> contiguous <8H> records and pad to 0x10 alignment."""
+    import struct
+    out = bytearray()
+    for r in rows:
+        out += struct.pack(
+            '<8H',
+            r.monster_id, r.monster_flag, r.base_points,
+            r.level1_points, r.level2_points, r.level3_points,
+            r.level4_points, r.level5_points
+        )
+    # pad to 0x10 (safe, compact). Use 0x1000 if you want to preserve original size.
+    while len(out) % 0x10 != 0:
+        out += b'\x00'
+    return bytes(out)
+
 def _verify_mhfdat_signature(data: bytes):
     import struct
     header1 = struct.unpack_from("<I", data, 0x0)[0]
@@ -91,14 +116,64 @@ def parse_mhfdat(path: str):
     }
 
 
-def save_mhfdat(template_path: str, output_path: str, parsed: dict):
-    """Write edits back using a template file, preserving everything else."""
-    data = bytearray(parsed.get('buffer') or open(template_path, 'rb').read())
-    # write monster rows
-    for row in parsed['monster_rows']:
-        data[row.offset:row.offset+16] = row.to_bytes()
-    # write counters
-    c = parsed['counters']
-    data[c.offset:c.offset+10] = c.to_bytes()
-    with open(output_path, 'wb') as f:
+def save_mhfdat(
+    template_path: str,
+    output_path: str,
+    parsed: dict,
+    *,
+    always_move_to_eof: bool = True,
+    eof_align: int = 0x10,
+    end_padding: int = 0x400  # padding after the new block (tweak as needed)
+):
+    """
+    Save edits to mhfdat:
+      - Always relocate Monster Data block to EOF (if always_move_to_eof=True),
+      - Align the insertion point to 'eof_align',
+      - Add 'end_padding' bytes after the written block,
+      - Update PTR_MONSTER_DATA (0xB20) to the new EOF address,
+      - Write DataCounters (RoadEntries).
+    """
+    import struct
+
+    # Base buffer: original file or fallback template
+    data = bytearray(parsed.get("buffer") or open(template_path, "rb").read())
+
+    rows = parsed["monster_rows"]
+    counters = parsed["counters"]
+
+    # Build the new Monster Data block (8 x u16 per row, padded to 0x10)
+    new_block = _build_monster_block(rows)
+
+    # --- always relocate to EOF if requested ---
+    if always_move_to_eof:
+        # Align the EOF before we drop the new block
+        _pad_to_alignment(data, eof_align)
+
+        new_ptr = len(data)            # <-- absolute offset of new block at EOF
+        data += new_block              # append the new block
+        if end_padding > 0:
+            data += b"\x00" * end_padding  # ensure trailing padding at file end
+
+        # Update the pointer at 0xB20 to point to the new block
+        struct.pack_into("<I", data, PTR_MONSTER_DATA, new_ptr)
+    else:
+        original_ptr = parsed["monster_ptr"]
+        data[original_ptr:original_ptr + len(new_block)] = new_block
+        slack_start = original_ptr + len(new_block)
+        slack_end = original_ptr + MONSTER_BLOCK_SIZE
+        if slack_start < slack_end:
+            data[slack_start:slack_end] = b"\x00" * (slack_end - slack_start)
+        new_ptr = original_ptr
+
+    # Write DataCounters (RoadEntries, etc.)
+    data[counters.offset : counters.offset + 10] = counters.to_bytes()
+
+    # Persist to disk
+    with open(output_path, "wb") as f:
         f.write(data)
+
+    # Keep parsed in sync for any follow-up operations
+    parsed["monster_ptr"] = new_ptr
+    parsed["buffer"] = bytes(data)
+
+

@@ -1,16 +1,22 @@
-
 import os, sys
 from PySide6.QtWidgets import QApplication, QMainWindow, QWidget, QHBoxLayout, QVBoxLayout, QLabel, QPushButton, QMessageBox, QFileDialog
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush, QIcon
+from PySide6.QtGui import QFontDatabase, QFont
+from PySide6.QtWidgets import QLabel
+from PySide6.QtWidgets import QGraphicsDropShadowEffect
+from PySide6.QtGui import QColor
 
 from core.paths import ROOTDIR
 from core.io import parse_rengoku_data
 from core.excel import create_excel_from_bin, export_excel_to_bin
 from core.mhfdat_io import parse_mhfdat
+from core.paths import resource_path
+
 from ui.monster_points_editor import MonsterPointsEditor
 from ui.styles import app_stylesheet
 from ui.dialogs import InAppEditor, ModeChooser
+
 
 class RengokuWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -30,11 +36,11 @@ class RengokuWindow(QMainWindow):
         central = QWidget(self)
         self.setCentralWidget(central)
 
-        bg = QPixmap(str(ROOTDIR / "./asset/bg.png"))
+        bg = QPixmap(str(ROOTDIR / "./asset/bg.jpg"))
         if not bg.isNull():
             bg = bg.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             tmp = QPixmap(bg.size()); tmp.fill(Qt.transparent)
-            p = QPainter(tmp); p.setOpacity(0.85); p.drawPixmap(0, 0, bg); p.end()
+            p = QPainter(tmp); p.setOpacity(0.50); p.drawPixmap(0, 0, bg); p.end()
             pal = self.palette(); pal.setBrush(QPalette.ColorRole.Window, QBrush(tmp)); self.setPalette(pal)
 
         outer = QHBoxLayout(central)
@@ -43,18 +49,41 @@ class RengokuWindow(QMainWindow):
         outer.addLayout(column)
         outer.addStretch(1)
 
+        from PySide6.QtGui import QFontDatabase, QFont
+        from core.paths import resource_path
+
         column.addStretch(1)
+
+        # Robust font load
+        font_path = str(resource_path("asset", "Monster_hunter_frontier.ttf"))
+        font_id = QFontDatabase.addApplicationFont(font_path)
+        families = QFontDatabase.applicationFontFamilies(font_id) if font_id != -1 else []
 
         header = QLabel("Hunting Road Editor", self)
         header.setAlignment(Qt.AlignCenter)
-        header.setProperty("class", "header")
+        header.setStyleSheet("color: #66CCFF; font-size: 28px; font-weight: bold;")
+        header.setObjectName("appHeader")
+
+        # 🔹 Apply glow effect
+        glow = QGraphicsDropShadowEffect(self)
+        glow.setBlurRadius(20)
+        glow.setColor(QColor("#00FFFF"))
+        glow.setOffset(0, 0)
+        header.setGraphicsEffect(glow)
+
+        if families:
+            header.setFont(QFont(families[0], 22))
+        else:
+            print(f"[WARN] Could not load font at: {font_path}")
+            header.setFont(QFont("Segoe UI", 22))  # explicit fallback
+
         column.addWidget(header)
 
         self.load_button = QPushButton("Load Rengoku Data", self)
         self.load_button.clicked.connect(self.load_rengoku_data)
         column.addWidget(self.load_button, 0, Qt.AlignHCenter)
 
-        self.load_mhfdat_button = QPushButton("Load Mhfdat Data", self)
+        self.load_mhfdat_button = QPushButton("Load mhfdat.bin", self)
         self.load_mhfdat_button.clicked.connect(self.load_mhfdat_data)
         column.addWidget(self.load_mhfdat_button, 0, Qt.AlignHCenter)
 
@@ -74,12 +103,13 @@ class RengokuWindow(QMainWindow):
         self.editor_button = QPushButton("Open In-App Editor", self)
         self.editor_button.clicked.connect(self.open_in_app_editor)
         column.addWidget(self.editor_button, 0, Qt.AlignHCenter)
+        column.setSpacing(10)
 
         self.help_button = QPushButton("About", self)
         self.help_button.clicked.connect(self.open_help)
         column.addWidget(self.help_button, 0, Qt.AlignHCenter)
 
-        column.addStretch(2)
+        column.addStretch(5)
 
         for w in [self.export_button, self.import_button, self.editor_button]:
             w.setEnabled(False)
@@ -103,8 +133,6 @@ class RengokuWindow(QMainWindow):
             return
         dlg = MonsterPointsEditor(self.mhfdat_path, self.mhfdat_parsed, self)
         dlg.exec()
-
-
 
     def open_help(self):
         msg = QMessageBox(self)

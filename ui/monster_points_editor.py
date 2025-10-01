@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QHBoxLayout, QPushB
                                QFileDialog, QSpinBox, QWidget, QFormLayout)
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush
-
+from ui.utils import apply_dialog_background
 from core.paths import ROOTDIR
 from core.constants import MONSTERS
 from core.mhfdat_io import parse_mhfdat, save_mhfdat, MonsterPoints
@@ -48,6 +48,8 @@ class MonsterPointsEditor(QDialog):
         self.setModal(True)
         self.setWindowTitle("Monster Points Editor")
         self.resize(1000, 700)
+
+        apply_dialog_background(self, image_name="bg3.jpg", opacity=0.65)  # or your current file
         # Allow maximize
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint |
                             Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint)
@@ -76,7 +78,10 @@ class MonsterPointsEditor(QDialog):
         self.spn_road_entries.setRange(0, 10000)
         self.spn_road_entries.setValue(parsed['counters'].RoadEntries)
         self.spn_road_entries.setStyleSheet(EDITOR_TEXT_STYLE)
-        form.addRow("RoadEntries:", self.spn_road_entries)
+        label = QLabel("RoadEntries:", self)
+        label.setStyleSheet("color: #66CCFF;")
+        form.addRow(label, self.spn_road_entries)
+       # form.addRow("RoadEntries:", self.spn_road_entries)
         layout.addWidget(top_box)
 
         # Table group
@@ -90,6 +95,13 @@ class MonsterPointsEditor(QDialog):
         # Buttons
         btns = QHBoxLayout()
         btns.addStretch(1)
+        self.btn_add = QPushButton("Add Row", self)
+        self.btn_add.clicked.connect(self._add_row)
+        btns.addWidget(self.btn_add)
+
+        self.btn_delete = QPushButton("Delete Selected", self)
+        self.btn_delete.clicked.connect(self._delete_selected)
+        btns.addWidget(self.btn_delete)
         self.btn_save = QPushButton("Save Changes to Mhfdat", self)
         self.btn_save.clicked.connect(self._save)
         btns.addWidget(self.btn_save)
@@ -124,11 +136,46 @@ class MonsterPointsEditor(QDialog):
         tv.setWordWrap(False)
         tv.setShowGrid(True)
 
+    def _refresh_model(self):
+        # Rebuild table model from list, preserving selection if desired
+        self.model.beginResetModel()
+        self.model.endResetModel()
+
+    def _add_row(self):
+        from core.mhfdat_io import MonsterPoints
+        # Append a sensible default row (monster_id=1, zeros elsewhere)
+        self.parsed['monster_rows'].append(
+            MonsterPoints(
+                monster_id=1, monster_flag=0, base_points=0,
+                level1_points=0, level2_points=0, level3_points=0,
+                level4_points=0, level5_points=0, offset=-1  # -1 indicates "new row" (no original offset)
+            )
+        )
+        self._refresh_model()
+
+    def _delete_selected(self):
+        idx = self.table.currentIndex()
+        if not idx.isValid():
+            return
+        row = idx.row()
+        if 0 <= row < len(self.parsed['monster_rows']):
+            del self.parsed['monster_rows'][row]
+            self._refresh_model()
+
     def _save(self):
-        # apply RoadEntries value
         self.parsed['counters'].RoadEntries = self.spn_road_entries.value()
-        # write to new file
         out_path, _ = QFileDialog.getSaveFileName(self, "Save mhfdat File", "", "Binary Files (*.bin)")
         if not out_path:
             return
-        save_mhfdat(self.mhfdat_path, out_path, self.parsed)
+        from core.mhfdat_io import save_mhfdat
+        # Force EOF placement + add padding (tune end_padding/align if you need)
+        save_mhfdat(
+            self.mhfdat_path,
+            out_path,
+            self.parsed,
+            always_move_to_eof=True,
+            eof_align=0x10,  # or 0x100/0x1000 if you want wider alignment
+            end_padding=0x400  # extra trailing pad after the block
+        )
+
+

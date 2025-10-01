@@ -10,6 +10,16 @@ It allows you to view, modify, and export both **Floor Stats** and **Spawn Table
 - **Load Rengoku Data**
   - Open a `rengoku_data.bin` file and parse its contents into structured tables.
 
+- **Monster Points Editor**
+  - Load a `mhfdat.bin` file using **Load Mhfdat Data**.
+  - Once loaded, the **Edit Monster Points** button will be enabled.
+  - Opens a dedicated in-app table editor for the **Monster Data** block inside `mhfdat.bin`.
+  - Edit monster IDs, flags, base points, and level-based point values directly in the table.
+  - Includes a `RoadEntries` counter field (from the DataCounters block) for editing.
+  - Uses dropdowns and spinboxes for safe, validated editing.
+  - Ensures correct file type by validating the `mhfdat.bin` header before parsing.
+  - Save your changes to a new `mhfdat.bin` while preserving all unrelated data.
+
 - **Export to Excel**
   - Export Floor Stats and Spawn Tables into an `.xlsx` file.
   - Automatically includes Monster Key and Spawn Table Key sheets.
