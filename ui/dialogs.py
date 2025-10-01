@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QHBoxLayout, QPushB
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush
 import openpyxl
+from numpy.distutils.misc_util import cyan_text
 
 from core.paths import ROOTDIR
 from core.constants import DETAILS_XLSX_DEFAULT, NOTES_TEXT
@@ -139,7 +140,7 @@ class InAppEditor(QDialog):
 
     def _install_spawn_delegates(self, table:QTableView):
         map_items = [
-            ("Default/Stage Param (0)", 0),
+            ("Default/Stage Param", 4294967295),
             ("Shakalaka (0)", 0),
             ("Blango Spawns (1)", 1),
             ("King Shakalaka (2)", 2),
@@ -149,10 +150,10 @@ class InAppEditor(QDialog):
         ]
         flag_items = [
             ("Default (0)", 0),
-            ("Forced Spawn (2)", 2),
-            ("Bonus Stage Flag (4)", 4),
-            ("Forced Bonus Stage (6)", 6),
-            ("Spawn Disabled? (8)", 8),
+            ("Forced Spawn (2) Used for Fatalis as default", 2),
+            ("Bonus Stage Flag (4) Enables Purple Text + Road Medal Reward", 4),
+            ("Forced Bonus Stage (6) A combination of flag 4 and 2. ", 6),
+            ("Spawn Disabled? (8) Prevents this monster slot from spawning. (Needs Tests)", 8),
         ]
         # columns: 0 monster,1 int,2 monster,3 int,4 int,5 map enum,6 int,7 flag enum
         table.setItemDelegateForColumn(0, MonsterDelegate(table))
@@ -265,24 +266,31 @@ class ModeChooser(QDialog):
         super().__init__(parent)
         self.setModal(True)
         self.setWindowTitle("Choose Road Type")
-        self.resize(420, 240)
+        self.setFixedSize(420, 400)
 
-        bg = QPixmap(str(ROOTDIR / "./asset/bg.png"))
+        bg = QPixmap(str(ROOTDIR / "./asset/bg2.jpg"))
         if not bg.isNull():
             bg = bg.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             tmp = QPixmap(bg.size()); tmp.fill(Qt.transparent)
-            p = QPainter(tmp); p.setOpacity(0.75); p.drawPixmap(0, 0, bg); p.end()
+            p = QPainter(tmp); p.setOpacity(0.50); p.drawPixmap(0, 0, bg); p.end()
             pal = self.palette(); pal.setBrush(QPalette.ColorRole.Window, QBrush(tmp)); self.setPalette(pal)
 
         v = QVBoxLayout(self)
-        label = QLabel("Open which road to edit?", self)
+        label = QLabel("Road Mode Selection", self)
         label.setAlignment(Qt.AlignCenter)
+        label.setStyleSheet("color: #66CCFF; font-weight: bold;")
         label.setProperty("class", "header")
         v.addWidget(label)
-        btns = QHBoxLayout()
-        self.btn_multi = QPushButton("Multi Road", self)
+        btns = QVBoxLayout()
+        self.btn_multi = QPushButton("Multiplayer Road", self)
         self.btn_solo = QPushButton("Solo Road", self)
-        btns.addStretch(1); btns.addWidget(self.btn_multi); btns.addSpacing(12); btns.addWidget(self.btn_solo); btns.addStretch(1)
+
+        btns.addStretch(1)
+        btns.addWidget(self.btn_multi, 0, Qt.AlignHCenter)
+        btns.addSpacing(12)
+        btns.addWidget(self.btn_solo, 0, Qt.AlignHCenter)
+        btns.addStretch(1)
+
         v.addLayout(btns)
         self.choice = None
         self.btn_multi.clicked.connect(self._pick_multi)

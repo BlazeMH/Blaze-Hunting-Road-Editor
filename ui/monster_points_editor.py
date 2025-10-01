@@ -47,15 +47,16 @@ class MonsterPointsEditor(QDialog):
         super().__init__(parent)
         self.setModal(True)
         self.setWindowTitle("Monster Points Editor")
+        self.setStyleSheet("color: #66CCFF; font-weight: bold;")
         self.resize(1000, 700)
 
-        apply_dialog_background(self, image_name="bg3.jpg", opacity=0.65)  # or your current file
+        apply_dialog_background(self, image_name="bg2.jpg", opacity=0.65)  # or your current file
         # Allow maximize
         self.setWindowFlags(Qt.Window | Qt.WindowCloseButtonHint | Qt.WindowMinimizeButtonHint |
                             Qt.WindowMaximizeButtonHint | Qt.WindowTitleHint)
 
         # background
-        bg = QPixmap(str(ROOTDIR / "asset" / "bg.png"))
+        bg = QPixmap(str(ROOTDIR / "asset" / "bg2.jpg"))
         if not bg.isNull():
             bg = bg.scaled(self.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
             tmp = QPixmap(bg.size()); tmp.fill(Qt.transparent)
@@ -168,13 +169,13 @@ class MonsterPointsEditor(QDialog):
         if not out_path:
             return
         from core.mhfdat_io import save_mhfdat
-        # Force EOF placement + add padding (tune end_padding/align if you need)
+        # Force EOF placement + add padding
         save_mhfdat(
             self.mhfdat_path,
             out_path,
             self.parsed,
             always_move_to_eof=True,
-            eof_align=0x10,  # or 0x100/0x1000 if you want wider alignment
+            eof_align=0x10,
             end_padding=0x400  # extra trailing pad after the block
         )
 
