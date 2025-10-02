@@ -15,28 +15,53 @@ class MonsterPointsModel(SpawnTableModel):
     """Reuse SpawnTableModel skeleton but adapt to MonsterPoints columns."""
     COLS = ["monster_id","monster_flag","base_points",
             "level1_points","level2_points","level3_points","level4_points","level5_points"]
+
+    HEADER_TITLES = [
+        "Monster", "Flag", "Base Points",
+        "Level 1 Points", "Level 2 Points", "Level 3 Points",
+        "Level 4 Points", "Level 5 Points"
+    ]
+
     def __init__(self, rows, parent=None):
         super().__init__(rows, parent=parent)
+
+    def headerData(self, section, orientation, role=Qt.DisplayRole):
+        if role == Qt.DisplayRole and orientation == Qt.Horizontal:
+            try:
+                return self.HEADER_TITLES[section]
+            except IndexError:
+                return ""
+        if role == Qt.DisplayRole and orientation == Qt.Vertical:
+            return section + 1
+        return super().headerData(section, orientation, role)
+
     def data(self, index, role=Qt.DisplayRole):
-        if not index.isValid(): return None
-        obj = self.rows[index.row()]; col = self.COLS[index.column()]
-        val = getattr(obj, col)
+        if not index.isValid():
+            return None
+        obj  = self.rows[index.row()]
+        coln = self.COLS[index.column()]
+        val  = getattr(obj, coln)
         if role in (Qt.DisplayRole, Qt.EditRole):
-            if col == "monster_id":
-                try: return MONSTERS[val]
-                except Exception: return val
+            if coln == "monster_id":
+                try:
+                    return MONSTERS[val]
+                except Exception:
+                    return val
             return val
         return None
+
     def setData(self, index, value, role=Qt.EditRole):
-        if role != Qt.EditRole or not index.isValid(): return False
-        obj = self.rows[index.row()]; col = self.COLS[index.column()]
+        if role != Qt.EditRole or not index.isValid():
+            return False
+        obj  = self.rows[index.row()]
+        coln = self.COLS[index.column()]
         try:
-            if col == "monster_id":
+            if coln == "monster_id":
                 if isinstance(value, str):
                     value = MONSTERS.index(value) if not value.isdigit() else int(value)
             else:
                 value = int(value)
-            setattr(obj, col, value)
+            setattr(obj, coln, value)
             self.dataChanged.emit(index, index, [Qt.DisplayRole, Qt.EditRole])
             return True
         except Exception:

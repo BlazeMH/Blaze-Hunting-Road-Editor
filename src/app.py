@@ -119,6 +119,11 @@ class RengokuWindow(QMainWindow):
         self.edit_points_button.setEnabled(False)
         grid.addWidget(self.edit_points_button, 1, 1)
 
+        self.edit_catshop_button = QPushButton("Edit Road Cat Shop", self)
+        self.edit_catshop_button.clicked.connect(self.open_catshop_editor)
+        self.edit_catshop_button.setEnabled(False)
+        grid.addWidget(self.edit_catshop_button, 2,1)
+
         # Balance the grid (empty cells where needed)
         grid.addItem(QSpacerItem(0, 0), 2, 1)
         grid.addItem(QSpacerItem(0, 0), 3, 1)
@@ -147,7 +152,9 @@ class RengokuWindow(QMainWindow):
             self.mhfdat_parsed = parse_mhfdat(file_path)
             self.mhfdat_path = file_path
             QMessageBox.information(self, "Success", "mhfdat data loaded successfully!")
+            #successful mhfdat load
             self.edit_points_button.setEnabled(True)
+            self.edit_catshop_button.setEnabled(True)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to parse mhfdat:\n{e}")
             self.edit_points_button.setEnabled(False)
@@ -189,6 +196,14 @@ class RengokuWindow(QMainWindow):
         """)
 
         msg.show()
+
+    def open_catshop_editor(self):
+        if not getattr(self, "mhfdat_path", None):
+            QMessageBox.information(self, "Load mhfdat.bin", "Please load mhfdat.bin first.")
+            return
+        from ui.catshop_editor import CatShopEditor
+        dlg = CatShopEditor(self.mhfdat_path, getattr(self, "mhfdat_parsed", {}), self)
+        dlg.exec()
 
     def load_rengoku_data(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open Rengoku Data File", "", "Binary Files (*.bin)")

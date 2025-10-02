@@ -39,9 +39,26 @@ class FloorStatsModel(QAbstractTableModel):
         super().__init__(parent); self.rows = rows
     def rowCount(self, _=QModelIndex()): return len(self.rows)
     def columnCount(self, _=QModelIndex()): return len(self.COLS)
+
     def headerData(self, section, orientation, role=Qt.DisplayRole):
-        if role != Qt.DisplayRole: return None
-        return self.COLS[section] if orientation == Qt.Horizontal else section
+        if role != Qt.DisplayRole:
+            return None
+        if orientation == Qt.Horizontal:
+            name = self.COLS[section]
+            if name == "FloorNumber":
+                return "Floor"
+            elif name == "SpawnTableUsed":
+                return "Spawn Table"
+            elif name == "Unk0":
+                return "Unused"
+            elif name == "PointMulti1":
+                return "Points Multiplier 1"
+            elif name == "PointMulti2":
+                return "Points Multiplier 2"
+            elif name == "FinalLoop":
+                return "Final Loop"
+            return name
+            return section
     def flags(self, index):
         if not index.isValid(): return Qt.NoItemFlags
         return Qt.ItemIsEnabled | Qt.ItemIsSelectable | Qt.ItemIsEditable
@@ -75,7 +92,23 @@ class SpawnTableModel(QAbstractTableModel):
         if role != Qt.DisplayRole: return None
         if orientation == Qt.Horizontal:
             name = self.COLS[section]
-            return "Bonus Spawns" if name == "MapZoneOverride" else name
+            if name == "FirstMonsterID":
+                return "Monster 1"
+            elif name == "FirstMonsterVariant":
+                return "Variant 1"
+            elif name == "SecondMonsterID":
+                return "Monster 2"
+            elif name == "SecondMonsterVariant":
+                return "Variant 2"
+            elif name == "MonstersStatTable":
+                return "Stats Table"
+            elif name == "MapZoneOverride":
+                return "Bonus Spawns"
+            elif name == "SpawnWeighting":
+                return "Weight"
+            elif name == "AdditionalFlag":
+                return "Extra Flag"
+            return name
         return section
     def flags(self, index):
         if not index.isValid(): return Qt.NoItemFlags
