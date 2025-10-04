@@ -113,7 +113,7 @@ It primarily allows you to view, modify, and export both Floor Stats and Spawn T
 ## 🎖️ Credits
 
 Special thanks to those who helped with development and testing:
-- [Brentdbr](https://github.com/Brentdbr) — for outlining the Hunting Road data structure.  
+- [Brentdbr](https://github.com/Brentdbr) — for providing me initial information and outlining the Hunting Road data structure.  
 - [Pax](https://github.com/Paxlord) — For providing details on road-related counters and offsets.
 - [ezemania2](https://github.com/ezemania2) — for testing and feedback.
 - **Sera** — for continued testing and input, and help with pointer mapping.
