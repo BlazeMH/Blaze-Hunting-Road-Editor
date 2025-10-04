@@ -58,6 +58,7 @@ jobs:
             --paths ui `
             --hidden-import core `
             --hidden-import ui `
+            --hidden-import numpy `
             --hidden-import distutils `
             --noconsole `
             src/app.py
@@ -78,6 +79,7 @@ jobs:
             --paths ui \
             --hidden-import core \
             --hidden-import ui \
+            --hidden-import numpy \
             --hidden-import distutils \
             --noconsole \
             src/app.py
