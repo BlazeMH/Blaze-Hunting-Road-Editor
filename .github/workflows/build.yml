@@ -24,7 +24,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      # ✅ Windows setup (PowerShell syntax)
+      # 🪟 Windows dependency install
       - name: Install dependencies (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -33,7 +33,7 @@ jobs:
           if (Test-Path "requirements.txt") { pip install -r requirements.txt }
           pip install pyinstaller
 
-      # ✅ Linux setup (bash syntax)
+      # 🐧 Linux dependency install
       - name: Install dependencies (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -42,7 +42,7 @@ jobs:
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pyinstaller
 
-
+      # 🪟 Windows build (uses ; in --add-data)
       - name: Build (Windows)
         if: runner.os == 'Windows'
         shell: pwsh
@@ -52,13 +52,17 @@ jobs:
             --name BlazeRoadEditor `
             --icon=asset/icon.ico `
             --add-data "asset;asset" `
+            --paths . `
             --paths src `
             --paths core `
             --paths ui `
+            --hidden-import core `
+            --hidden-import ui `
             --hidden-import distutils `
             --noconsole `
             src/app.py
 
+      # 🐧 Linux build (uses : in --add-data)
       - name: Build (Linux)
         if: runner.os == 'Linux'
         shell: bash
@@ -68,15 +72,28 @@ jobs:
             --name BlazeRoadEditor \
             --icon=asset/icon.ico \
             --add-data "asset:asset" \
+            --paths . \
             --paths src \
             --paths core \
             --paths ui \
+            --hidden-import core \
+            --hidden-import ui \
             --hidden-import distutils \
             --noconsole \
             src/app.py
 
+      # 📦 Zip the builds for convenience
+      - name: Package zips
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then powershell Compress-Archive -Path dist\* -DestinationPath BlazeRoadEditor-Windows.zip; fi
+          if [ "$RUNNER_OS" = "Linux" ]; then zip -j BlazeRoadEditor-Linux.zip dist/*; fi
+
+      # ☁️ Upload artifacts (zips + raw dist)
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ runner.os }}-BlazeRoadEditor
-          path: dist/**
+          path: |
+            BlazeRoadEditor-*.zip
+            dist/**
