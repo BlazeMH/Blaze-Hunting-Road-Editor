@@ -105,13 +105,9 @@ It primarily allows you to view, modify, and export both Floor Stats and Spawn T
    - Shows an overview of all features and quick usage tips directly inside the app.
 ---
 ## 🙌 Conclusion
+  - The Road Editor is built to make **Hunting Road and related data editing** simple, visual, and safe.  
 
-BlazeRoadEditor is built to make **Hunting Road and related data editing** simple, visual, and safe.  
-It’s designed for modders, researchers, and community developers who want to explore Monster Hunter Frontier’s data structure in an accessible way.
-
-For questions, issues, or community collaboration, visit the GitHub repository:  
-[https://github.com/BlazeMH/Blaze-Hunting-Road-Editor](https://github.com/BlazeMH/Blaze-Hunting-Road-Editor)
-
+ - For questions, issues, feel free to submit an issue on here or contact me on discord @mokk.
 ---
 
 ## 🎖️ Credits
