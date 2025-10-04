@@ -77,23 +77,23 @@ class RengokuWindow(QMainWindow):
             header.setFont(QFont(families[0], 22))
         else:
             print(f"[WARN] Could not load font at: {font_path}")
-            header.setFont(QFont("Segoe UI", 22))  # explicit fallback
+            header.setFont(QFont("Segoe UI", 22))
 
         column.addWidget(header)
 
         # --- Two-column button grid ---
         grid = QGridLayout()
-        grid.setHorizontalSpacing(24)  # space between left/right columns
-        grid.setVerticalSpacing(14)  # space between rows
+        grid.setHorizontalSpacing(24)
+        grid.setVerticalSpacing(14)
         grid.setContentsMargins(0, 10, 0, 10)
 
         def prep(btn):
             btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            btn.setMinimumWidth(260)  # keeps columns visually equal
+            btn.setMinimumWidth(260)
             btn.setMinimumHeight(40)
             return btn
 
-        # Left column: Load Rengoku Data, Export, Import, Open Editor
+        # Left column: Load rengoku_data.bin
         self.load_button = prep(QPushButton("Load Rengoku Data", self))
         self.load_button.clicked.connect(self.load_rengoku_data)
         grid.addWidget(self.load_button, 0, 0)
@@ -130,20 +130,16 @@ class RengokuWindow(QMainWindow):
         self.edit_medal_button.setEnabled(False)
         grid.addWidget(self.edit_medal_button, 3, 1)
 
-        # Balance the grid (empty cells where needed)
         grid.addItem(QSpacerItem(0, 0), 2, 1)
         grid.addItem(QSpacerItem(0, 0), 3, 1)
 
-        # About button centered below both columns (spans 2 columns)
         self.help_button = prep(QPushButton("About", self))
         self.help_button.clicked.connect(self.open_help)
         grid.addWidget(self.help_button, 4, 0, 1, 2, alignment=Qt.AlignCenter)
 
-        # Make both columns share space evenly
         grid.setColumnStretch(0, 1)
         grid.setColumnStretch(1, 1)
 
-        # Add the grid into your main vertical layout
         column.addLayout(grid)
         column.addStretch(5)
 
@@ -219,8 +215,8 @@ class RengokuWindow(QMainWindow):
             <p>
                 <b>Tip:</b> The Hunting Road point rewards shown in-game come from
                 <code>mhfdat.bin</code>. If you add new monsters, remember to adjust
-                their Monster Points there.
-                Also, remember to compress and encrypt all files after editing with the tool, using either rsfrontier or refrontier.
+                the Base Monster Points there.
+                Also, remember to compress and encrypt all files after editing with the tool, using either Rsfrontier or Refrontier.
             </p>
             <p style="margin-top:10px; font-size:90%; color:#800080;">
                 For help, updates, or community info, visit the project on
@@ -299,7 +295,7 @@ class RengokuWindow(QMainWindow):
         if not out_path: return
         try:
             create_excel_from_bin(self.structs, out_path)
-            QMessageBox.information(self, "Success", "Exported to Excel (Details tab added if available).")
+            QMessageBox.information(self, "Success", "Exported to Excel")
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Export failed:\n{e}")
 

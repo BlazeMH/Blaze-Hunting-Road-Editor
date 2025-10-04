@@ -177,7 +177,6 @@ class MonsterPointsEditor(QDialog):
     def _computed_road_entries(self) -> int:
         """
         Define what RoadEntries means. Commonly: number of Monster Data rows.
-        If you want a different rule (e.g., only non-empty rows), adjust here.
         """
         return len(self.parsed['monster_rows'])
 

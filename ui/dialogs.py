@@ -4,7 +4,7 @@ from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QHBoxLayout, QPushB
                                QGroupBox, QAbstractItemView, QHeaderView, QFileDialog,
                                QMessageBox, QTextEdit, QTableWidget, QTableWidgetItem, QComboBox)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush
+from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush, QColor, QFont
 import openpyxl
 from numpy.distutils.misc_util import cyan_text
 
@@ -65,9 +65,9 @@ class InAppEditor(QDialog):
         self.notes_btn.clicked.connect(self.show_notes)
         tools.addWidget(self.notes_btn)
 
-        self.extra_btn = QPushButton("Extra Details", self)
-        self.extra_btn.clicked.connect(self.show_extra_details)
-        tools.addWidget(self.extra_btn)
+        self.btn_notes = QPushButton("Notes", self)
+        self.btn_notes.clicked.connect(self.show_notes2)
+        tools.addWidget(self.btn_notes)
         tools.addStretch(1)
         layout.addLayout(tools)
 
@@ -203,65 +203,142 @@ class InAppEditor(QDialog):
         v.addWidget(btn, 0, Qt.AlignRight)
         dlg.exec()
 
-    def show_extra_details(self):
-        path = os.environ.get("ROAD_DETAILS_XLSX", DETAILS_XLSX_DEFAULT)
-        if not os.path.exists(path):
-            QMessageBox.warning(self, "Extra Details", f"extra_details.xlsx not found at:\n{path}")
-            return
-        try:
-            wb = openpyxl.load_workbook(path, data_only=True)
-            if not wb.sheetnames:
-                QMessageBox.warning(self, "Extra Details", "Workbook has no sheets.")
-                return
-            ws = wb[wb.sheetnames[0]]
+  # Data: (Monster, Result)
+    def show_notes2(self):
+        notes = [
+            ("Akantor", "Functions without issues."),
+            ("Amatsu","The fight functions well and without issues, but Amatsu will spawn right at the player spawn point."),
+            ("Anorupatisu", "Functions without issues."),
+            ("Blinking Nargacuga", "Functions, but his nuke attack will have weird coordinates."),
+            ("Bulldrome", "Functions but practically has no HP."),
+            ("Burning Freezing Elzelion", "Functions."),
+            ("Cephadrome", "Functions without issues."),
+            ("Crimson Fatalis", "Functions but outdated fight."),
+            ("Crimson Fatalis G", "Half his attacks take him out of bounds. Functions but not recommended."),
+            ("Disufiroa","As 1 player, fight/cutscene functioned without issues. In multiplayer, the cutscene caused a softlock. Still needs testing."),
+            ("Forokururu", "Functions without issues."),
+            ("Gendrome", "Functions without issues."),
+            ("Gogomoa","Functions; one move has invisible debris. Pairing with Kokomoa can softlock as he runs away once Gogomoa is killed."),
+            ("Guanzorumu", "In Solo, functioned well; cutscene & phase transitions OK; no crash after kill. In multiplayer, caused a softlock. Still needs testing."),
+            ("Gurenzeburu", "Functions without issues."),
+            ("Howling Zinogre", "Functions without issues."),
+            ("Inagami (Non Zenith)", "Functions without issues."),
+            ("Inagami (Zenith)", "Should not be added until it is learned how to make his Bamboo properly spawn."),
+            ("Iodrome", "Functions without issues."),
+            ("Mi Ru", "Functions without issues."),
+            ("Musou Bogabadorumu", "Functions without issues."),
+            ("Odibatorasu", "Functions without issues. May benefit from custom stats for more HP."),
+            ("Phantom Dora", "Functions without issues."),
+            ("Poborubarumu", "Functions without issues."),
+            ("Rusted Kushala Daora", "Functions without issues. May benefit from custom stats for more HP."),
+            ("Shagaru Magala", "Functions without issues."),
+            ("Sparkling Zerureusu", "Functions, but his hp-based attack has awkward coordinates out of bounds."),
+            ("Starving Deviljho", "Functions without issues."),
+            ("Supremacy Dora", "Functions without issues. May benefit from custom stats for more HP."),
+            ("Supremacy Teostra", "Functions without issues."),
+            ("Taikun Zamuza (Zenith)","When tested, softlocks the road after being killed. The launcher attack causes an issue with player zone loading."),
+            ("Unknown", "Functions; no obvious issues."),
+            ("White Monoblos", "Functions without issues."),
+            ("Yama Kurai", "Functions; no obvious issues."),
+            ("Yama Tsukami", "Untested "),
+        ]
 
-            dlg = QDialog(self)
-            dlg.setWindowTitle("Extra Details")
-            dlg.resize(900, 600)
-            v = QVBoxLayout(dlg)
+        dlg = QDialog(self)
+        dlg.setWindowTitle("Monster Notes — Hunting Road")
+        dlg.resize(780, 540)
+        dlg.setWindowModality(Qt.NonModal)
+        dlg.setModal(False)
 
-            table = QTableWidget(dlg)
+        v = QVBoxLayout(dlg)
 
-            max_row = ws.max_row
-            max_col = ws.max_column
+        # Header note with black text
+        lbl = QLabel(
+            "<b style='color:#111;'>Monster Notes (Hunting Road)</b><br>"
+            "<span style='color:#111;'>Quick reference for which monsters function properly when added to Hunting Road.<br>"
+            "<i>Note:</i> These results are based on personal testing and may change as more information is gathered.<br>"
+            "If you discover additional details on these or monsters not listed here, please let me know.</span>"
+        )
+        lbl.setWordWrap(True)
+        lbl.setStyleSheet("background: #e1ecf4; border-radius: 4px; padding: 8px;")
+        v.addWidget(lbl)
 
-            headers = [str(ws.cell(1, c).value or "").strip() for c in range(1, max_col + 1)]
-            drop_terms = {"video", "color codes", "untested"}
-            keep_idx = []
-            keep_headers = []
-            for i, h in enumerate(headers, start=1):
-                hl = h.lower()
-                if hl in drop_terms:
-                    continue
-                keep_idx.append(i)
-                keep_headers.append(h if h else f"Column {i}")
+        # Table setup
+        tbl = QTableWidget(dlg)
+        tbl.setColumnCount(2)
+        tbl.setHorizontalHeaderLabels(["Monster", "Result"])
+        tbl.setRowCount(len(notes))
+        tbl.setEditTriggers(QTableWidget.NoEditTriggers)
+        tbl.setSelectionMode(QTableWidget.NoSelection)
+        tbl.setShowGrid(True)
+        tbl.verticalHeader().setVisible(False)
+        tbl.horizontalHeader().setHighlightSections(False)
+        tbl.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeToContents)
+        tbl.horizontalHeader().setSectionResizeMode(1, QHeaderView.Stretch)
+        tbl.setWordWrap(True)
 
-            if not keep_idx:
-                keep_idx = list(range(1, max_col + 1))
-                keep_headers = [f"Column {i}" for i in keep_idx]
+        # Style (dark table, black header block)
+        tbl.setStyleSheet("""
+            QTableWidget {
+                background-color: #0e1c2c;
+                alternate-background-color: #132437;
+                color: #cde9f5;
+                gridline-color: #253b50;
+                selection-background-color: #18324a;
+                font-size: 13px;
+            }
+            QHeaderView::section {
+                background-color: #2b3f55;
+                color: cyan;
+                padding: 6px 8px;
+                border: none;
+                font-weight: 600;
+                text-align: left;
+            }
+            QTableCornerButton::section {
+                background-color: #2b3f55;
+                border: none;
+            }
+            QPushButton {
+                background-color: #101b2b;
+                border: 1px solid #2b4a66;
+                border-radius: 6px;
+                color: cyan;
+                font-weight: bold;
+                padding: 6px 14px;
+            }
+            QPushButton:hover {
+                background-color: #16314a;
+            }
+        """)
 
-            data_rows = max(0, max_row - 1)
-            table.setRowCount(data_rows)
-            table.setColumnCount(len(keep_idx))
-            table.setHorizontalHeaderLabels(keep_headers)
+        # Populate rows
+        for r, (monster, result) in enumerate(notes):
+            it0 = QTableWidgetItem(monster)
+            it0.setForeground(QColor(0, 255, 255))
+            it0.setFont(QFont("Segoe UI", 10, QFont.Bold))
+            it0.setFlags(Qt.ItemIsEnabled)
+            tbl.setItem(r, 0, it0)
 
-            for r in range(2, max_row + 1):
-                for ci, c in enumerate(keep_idx):
-                    val = ws.cell(r, c).value
-                    table.setItem(r - 2, ci, QTableWidgetItem("" if val is None else str(val)))
+            it1 = QTableWidgetItem(result if result else "—")
+            it1.setFlags(Qt.ItemIsEnabled)
+            it1.setForeground(QColor("#cde9f5"))
+            tbl.setItem(r, 1, it1)
 
-            table.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-            table.verticalHeader().setSectionResizeMode(QHeaderView.Fixed)
-            table.verticalHeader().setDefaultSectionSize(22)
-            v.addWidget(table)
+            if r % 2 == 1:
+                it0.setBackground(QColor("#0b1a28"))
+                it1.setBackground(QColor("#0b1a28"))
 
-            close_btn = QPushButton("Close", dlg)
-            close_btn.clicked.connect(dlg.accept)
-            v.addWidget(close_btn, 0, Qt.AlignRight)
+        v.addWidget(tbl)
 
-            dlg.exec()
-        except Exception as e:
-            QMessageBox.critical(self, "Extra Details", f"Failed to load Excel:\n{e}")
+        # Close button
+        btn_row = QHBoxLayout()
+        btn_row.addStretch(1)
+        btn_close = QPushButton("Close", dlg)
+        btn_close.clicked.connect(dlg.close)
+        btn_row.addWidget(btn_close)
+        v.addLayout(btn_row)
+
+        dlg.show()
 
 
 class ModeChooser(QDialog):

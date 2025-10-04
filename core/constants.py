@@ -29,9 +29,6 @@ MONSTERS = [
 ]
 
 NOTES_TEXT = (
-    "Monster Variant Details\n"
-    "=======================\n\n"
-
     "Musou Variants\n"
     "--------------\n"
     "• Musou Guanzorumu — 0F / 15\n"

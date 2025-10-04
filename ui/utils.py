@@ -7,7 +7,6 @@ def apply_dialog_background(dialog, image_name="bg3.jpg", opacity=0.65):
     """
     Paint a scaled background image on a QDialog (resizes with the dialog).
     """
-    # enable palette painting
     dialog.setAutoFillBackground(True)
 
     # load & scale
@@ -17,7 +16,6 @@ def apply_dialog_background(dialog, image_name="bg3.jpg", opacity=0.65):
 
     scaled = pix.scaled(dialog.size(), Qt.KeepAspectRatioByExpanding, Qt.SmoothTransformation)
 
-    # optional opacity: precompose onto a temp pixmap
     if 0.0 <= opacity < 1.0:
         tmp = QPixmap(scaled.size())
         tmp.fill(Qt.transparent)

@@ -12,7 +12,6 @@ except Exception:  # pragma: no cover
     from core.constants import MONSTERS
 # ----------------------------------------------------------------------------
 
-# Cyan dropdown text for combo editors
 DROPDOWN_STYLE = """
 QComboBox { 
     color: cyan;
@@ -26,7 +25,6 @@ QComboBox QAbstractItemView {
 }
 """
 
-# Cyan text for editors while editing (spinboxes / line edits)
 EDITOR_TEXT_STYLE = """
 QSpinBox, QDoubleSpinBox, QLineEdit {
     color: cyan;
@@ -41,6 +39,10 @@ class FloorStatsModel(QAbstractTableModel):
     def columnCount(self, _=QModelIndex()): return len(self.COLS)
 
     def headerData(self, section, orientation, role=Qt.DisplayRole):
+        # 1) Alignment for header text
+        if role == Qt.TextAlignmentRole and orientation == Qt.Horizontal:
+            return Qt.AlignLeft | Qt.AlignVCenter  # left-align all column headers
+
         if role != Qt.DisplayRole:
             return None
         if orientation == Qt.Horizontal:
@@ -89,6 +91,10 @@ class SpawnTableModel(QAbstractTableModel):
     def rowCount(self, _=QModelIndex()): return len(self.rows)
     def columnCount(self, _=QModelIndex()): return len(self.COLS)
     def headerData(self, section, orientation, role=Qt.DisplayRole):
+        # 1) Alignment for header text
+        if role == Qt.TextAlignmentRole and orientation == Qt.Horizontal:
+            return Qt.AlignLeft | Qt.AlignVCenter  # left-align all column headers
+
         if role != Qt.DisplayRole: return None
         if orientation == Qt.Horizontal:
             name = self.COLS[section]
@@ -137,7 +143,6 @@ class SpawnTableModel(QAbstractTableModel):
             return True
         except Exception:
             return False
-
 
 class MonsterDelegate(QStyledItemDelegate):
     def createEditor(self, parent, option, index):

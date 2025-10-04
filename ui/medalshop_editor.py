@@ -262,8 +262,17 @@ class MedalShopEditor(QDialog):
         if not self.id_to_name:
             QMessageBox.information(self, "No Items Mapping", "No item names loaded from Items.xlsx.")
             return
-        dlg = ItemListDialog(self.id_to_name, self)
-        dlg.exec()
+
+        if getattr(self, "_items_dlg", None) and self._items_dlg.isVisible():
+            self._items_dlg.raise_()
+            self._items_dlg.activateWindow()
+            return
+
+        self._items_dlg = ItemListDialog(self.id_to_name, self)
+        self._items_dlg.setAttribute(Qt.WA_DeleteOnClose)
+        self._items_dlg.setWindowModality(Qt.NonModal)
+        self._items_dlg.setWindowFlags(self._items_dlg.windowFlags() | Qt.Window)
+        self._items_dlg.show()
 
     def _export_json(self):
         path, _ = QFileDialog.getSaveFileName(self, "Export MedalShop JSON", "medalshop.json", "JSON Files (*.json)")

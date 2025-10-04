@@ -3,6 +3,7 @@
 BlazeRoadEditor is a GUI tool for editing **Monster Hunter Frontier Z's Hunting Road** data and related systems.  
 It allows you to view, modify, and export both Floor Stats and Spawn Tables, and comes with support for Excel integration and an in-app editor.
 
+![Main App](docs/main_app.png)
 ---
 
 ## ✨ Features
@@ -26,7 +27,6 @@ It allows you to view, modify, and export both Floor Stats and Spawn Tables, and
   - Optional **Variant Flags** and **Extra Details** viewers for quick monster info.
 
 ---
-
 ### 🔹 MHF Dat (`mhfdat.bin`)
 - **Load MHF Dat**
   - Open a decompressed `mhfdat.bin` file to unlock all editing tools.
@@ -55,9 +55,6 @@ It allows you to view, modify, and export both Floor Stats and Spawn Tables, and
   - Supports **JSON Export/Import** and includes an **Items List** popup.
 ---
 ## 📸 Screenshots
-
-### Main App View
-![Main App](docs/main_app.png)
 
 ### In-App Editor View
 ![In-App Editor](docs/in_app_editor.png)
