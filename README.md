@@ -1,6 +1,6 @@
 # Blaze Hunting Road Editor
 
-A GUI tool for editing **Monster Hunter Frontier Z's** Hunting Road data and related systems.  
+A GUI tool for editing **Monster Hunter Frontier ZZ's** Hunting Road data and related systems.  
 It primarily allows you to view, modify, and export both Floor Stats and Spawn Tables, via Excel or an in-app editor.
 
 ![Main App](docs/main_app.png)
