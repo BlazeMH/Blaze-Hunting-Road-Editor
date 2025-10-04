@@ -24,29 +24,44 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
 
-      - name: Install dependencies
+      # ✅ Windows setup (PowerShell syntax)
+      - name: Install dependencies (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          if (Test-Path "requirements.txt") { pip install -r requirements.txt }
+          pip install pyinstaller
+
+      # ✅ Linux setup (bash syntax)
+      - name: Install dependencies (Linux)
+        if: runner.os == 'Linux'
+        shell: bash
         run: |
           python -m pip install --upgrade pip
           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
           pip install pyinstaller
 
+
       - name: Build (Windows)
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
-          pyinstaller ^
-            --onefile ^
-            --name BlazeRoadEditor ^
-            --icon=asset/icon.ico ^
-            --add-data "asset;asset" ^
-            --paths src ^
-            --paths core ^
-            --paths ui ^
-            --hidden-import distutils ^
-            --noconsole ^
+          pyinstaller `
+            --onefile `
+            --name BlazeRoadEditor `
+            --icon=asset/icon.ico `
+            --add-data "asset;asset" `
+            --paths src `
+            --paths core `
+            --paths ui `
+            --hidden-import distutils `
+            --noconsole `
             src/app.py
 
       - name: Build (Linux)
         if: runner.os == 'Linux'
+        shell: bash
         run: |
           pyinstaller \
             --onefile \
