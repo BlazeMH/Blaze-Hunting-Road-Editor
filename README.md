@@ -1,7 +1,7 @@
 # Blaze Hunting Road Editor
 
-Blaze Hunting Road Editor is a GUI tool for editing **Monster Hunter Frontier Z's Hunting Road** data and related systems.  
-It allows you to view, modify, and export both Floor Stats and Spawn Tables, and comes with support for Excel integration and an in-app editor.
+A GUI tool for editing **Monster Hunter Frontier Z's** Hunting Road data and related systems.  
+It primarily allows you to view, modify, and export both Floor Stats and Spawn Tables, via Excel or an in-app editor.
 
 ![Main App](docs/main_app.png)
 ---
@@ -13,19 +13,18 @@ It allows you to view, modify, and export both Floor Stats and Spawn Tables, and
   - Automatically detects valid data and enables the proper features.
 
 - **Export to Excel**
-  - Save all Floor Stats and Spawn Tables into an editable `.xlsx` file.
+  - Save all Floor Stats and Spawn Tables into an editable `.xlsx` file. (Only Multi Road)
   - Automatically includes Monster Key and Spawn Table Key sheets for quick reference.
 
-- **Import from Excel**
-  - Load your edited Excel file and apply the changes back into a new BIN.
+- **Import from Excel** 
+  - Load your edited Excel file and apply the changes back into a new BIN. 
   - Keeps all formatting and structure intact.
 
 - **In-App Editor**
   - Choose between **Multi Road** or **Solo Road** mode.
   - Edit Floor Stats and Spawn Tables directly within the tool.
   - Includes dropdowns, spinboxes, and automatic validation for safety.
-  - Optional **Variant Flags** and **Extra Details** viewers for quick monster info.
-
+  - Optional **Variant Flags** and **Notes** viewers for quick monster info.
 ---
 ### 🔹 MHF Dat (`mhfdat.bin`)
 - **Load MHF Dat**
@@ -105,9 +104,7 @@ It allows you to view, modify, and export both Floor Stats and Spawn Tables, and
 
 8. **About Button**
    - Shows an overview of all features and quick usage tips directly inside the app.
-
 ---
-
 ## 🙌 Conclusion
 
 BlazeRoadEditor is built to make **Hunting Road and related data editing** simple, visual, and safe.  
@@ -121,7 +118,11 @@ For questions, issues, or community collaboration, visit the GitHub repository:
 ## 🎖️ Credits
 
 Special thanks to those who helped with development and testing:
-
 - [Brentdbr](https://github.com/Brentdbr) — for outlining the Hunting Road data structure.  
-- [ezemania2](https://github.com/ezemania2) — for testing and feedback.  
-- **Sera** — for continued testing and input.  
+- [Pax](https://github.com/Paxlord) — For providing details on road-related counters and offsets.
+- [ezemania2](https://github.com/ezemania2) — for testing and feedback.
+- **Sera** — for continued testing and input, and help with pointer mapping.
+
+Additionally, thanks to the creators of these resources below:
+- Monster Hunter Frontier Patterns (ImHex patterns): https://github.com/var-username/Monster-Hunter-Frontier-Patterns
+- 010 Editor Templates for MHF: https://github.com/Mezeporta/010Templates
