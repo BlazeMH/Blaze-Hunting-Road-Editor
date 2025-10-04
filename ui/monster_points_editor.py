@@ -1,9 +1,8 @@
-
 from PySide6.QtWidgets import (QDialog, QVBoxLayout, QLabel, QHBoxLayout, QPushButton,
                                QTableView, QGroupBox, QAbstractItemView, QHeaderView,
-                               QFileDialog, QSpinBox, QWidget, QFormLayout)
+                               QFileDialog,QGraphicsDropShadowEffect, QSpinBox, QWidget, QFormLayout)
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush
+from PySide6.QtGui import QPixmap, QPainter, QPalette, QBrush, QColor
 from ui.utils import apply_dialog_background
 from core.paths import ROOTDIR
 from core.constants import MONSTERS
@@ -72,7 +71,7 @@ class MonsterPointsEditor(QDialog):
         super().__init__(parent)
         self.setModal(True)
         self.setWindowTitle("Monster Points Editor")
-        self.setStyleSheet("color: #66CCFF; font-weight: bold;")
+        self.setStyleSheet("color: cyan; font-weight: bold;")
         self.resize(1000, 700)
 
         apply_dialog_background(self, image_name="bg2.jpg", opacity=0.65)  # or your current file
@@ -97,17 +96,23 @@ class MonsterPointsEditor(QDialog):
         header.setProperty("class", "header")
         layout.addWidget(header)
 
-        # Top controls: RoadEntries
+        glow = QGraphicsDropShadowEffect(self)
+        glow.setBlurRadius(20)
+        glow.setColor(QColor("#00FFFF"))
+        glow.setOffset(0, 0)
+        header.setGraphicsEffect(glow)
+
+        # Top controls: RoadEntries (READ-ONLY + auto-update)
         top_box = QGroupBox("Data Counters", self)
         form = QFormLayout(top_box)
-        self.spn_road_entries = QSpinBox(top_box)
-        self.spn_road_entries.setRange(0, 10000)
-        self.spn_road_entries.setValue(parsed['counters'].RoadEntries)
-        self.spn_road_entries.setStyleSheet(EDITOR_TEXT_STYLE)
-        label = QLabel("RoadEntries:", self)
-        label.setStyleSheet("color: #66CCFF;")
-        form.addRow(label, self.spn_road_entries)
-       # form.addRow("RoadEntries:", self.spn_road_entries)
+
+        lbl = QLabel("RoadEntries:", self)
+        lbl.setStyleSheet("color: #66CCFF;")
+
+        self.lbl_road_entries = QLabel(str(parsed['counters'].RoadEntries), self)
+        self.lbl_road_entries.setStyleSheet("color: #66CCFF; font-weight: bold;")
+
+        form.addRow(lbl, self.lbl_road_entries)
         layout.addWidget(top_box)
 
         # Table group
@@ -128,7 +133,7 @@ class MonsterPointsEditor(QDialog):
         self.btn_delete = QPushButton("Delete Selected", self)
         self.btn_delete.clicked.connect(self._delete_selected)
         btns.addWidget(self.btn_delete)
-        self.btn_save = QPushButton("Save Changes to Mhfdat", self)
+        self.btn_save = QPushButton("Save", self)
         self.btn_save.clicked.connect(self._save)
         btns.addWidget(self.btn_save)
         btns.addStretch(1)
@@ -145,7 +150,9 @@ class MonsterPointsEditor(QDialog):
         # widen monster_id column
         hv = self.table.horizontalHeader()
         hv.setSectionResizeMode(0, QHeaderView.Interactive)
+        hv.setDefaultAlignment(Qt.AlignLeft)
         self.table.setColumnWidth(0, 240)
+        self._update_road_entries_label()
 
     def _style_table(self, tv:QTableView):
         tv.setAlternatingRowColors(True)
@@ -167,17 +174,27 @@ class MonsterPointsEditor(QDialog):
         self.model.beginResetModel()
         self.model.endResetModel()
 
+    def _computed_road_entries(self) -> int:
+        """
+        Define what RoadEntries means. Commonly: number of Monster Data rows.
+        If you want a different rule (e.g., only non-empty rows), adjust here.
+        """
+        return len(self.parsed['monster_rows'])
+
+    def _update_road_entries_label(self):
+        self.lbl_road_entries.setText(str(self._computed_road_entries()))
+
     def _add_row(self):
         from core.mhfdat_io import MonsterPoints
-        # Append a sensible default row (monster_id=1, zeros elsewhere)
         self.parsed['monster_rows'].append(
             MonsterPoints(
                 monster_id=1, monster_flag=0, base_points=0,
                 level1_points=0, level2_points=0, level3_points=0,
-                level4_points=0, level5_points=0, offset=-1  # -1 indicates "new row" (no original offset)
+                level4_points=0, level5_points=0, offset=-1
             )
         )
         self._refresh_model()
+        self._update_road_entries_label()
 
     def _delete_selected(self):
         idx = self.table.currentIndex()
@@ -187,21 +204,24 @@ class MonsterPointsEditor(QDialog):
         if 0 <= row < len(self.parsed['monster_rows']):
             del self.parsed['monster_rows'][row]
             self._refresh_model()
+            self._update_road_entries_label()  # ← add this
 
     def _save(self):
-        self.parsed['counters'].RoadEntries = self.spn_road_entries.value()
+        # sync in-memory counters before writing
+        self.parsed['counters'].RoadEntries = self._computed_road_entries()
+
         out_path, _ = QFileDialog.getSaveFileName(self, "Save mhfdat File", "", "Binary Files (*.bin)")
         if not out_path:
             return
         from core.mhfdat_io import save_mhfdat
-        # Force EOF placement + add padding
         save_mhfdat(
             self.mhfdat_path,
             out_path,
             self.parsed,
             always_move_to_eof=True,
             eof_align=0x10,
-            end_padding=0x400  # extra trailing pad after the block
+            end_padding=0x400
         )
+
 
 

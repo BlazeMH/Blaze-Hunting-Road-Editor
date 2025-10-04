@@ -48,10 +48,11 @@ class InAppEditor(QDialog):
         layout = QVBoxLayout(self)
 
         header = QLabel(f"In-App Editor — {'Multi Road' if mode=='multi' else 'Solo Road'}", self)
-        header.setStyleSheet("color: cyan; font-size: 18px; font-weight: bold;")
+        header.setStyleSheet("color: cyan; font-size: 24px; font-weight: bold;")
         header.setAlignment(Qt.AlignCenter)
         header.setProperty("class", "header")
         layout.addWidget(header)
+
 
         # Toolbar row
         tools = QHBoxLayout()
@@ -76,6 +77,7 @@ class InAppEditor(QDialog):
         self.tv_floor = QTableView(fs_group)
         self._style_table(self.tv_floor)
         fs_v.addWidget(self.tv_floor)
+        fs_group.setStyleSheet("color: cyan;")
         layout.addWidget(fs_group, 1)
 
         # Spawn Tables group
@@ -83,6 +85,7 @@ class InAppEditor(QDialog):
         sp_v = QVBoxLayout(sp_group)
         top_row = QHBoxLayout()
         top_row.addWidget(QLabel("Group:", sp_group))
+        sp_group.setStyleSheet("color: cyan;")
         self.group_combo = QComboBox(sp_group)
         self.group_combo.setStyleSheet(DROPDOWN_STYLE)
         top_row.addWidget(self.group_combo, 0)

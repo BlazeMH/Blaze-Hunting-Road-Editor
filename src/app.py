@@ -14,10 +14,11 @@ from core.paths import ROOTDIR, resource_path
 from core.io import parse_rengoku_data
 from core.excel import create_excel_from_bin, export_excel_to_bin
 from core.mhfdat_io import parse_mhfdat
-
+from ui.medalshop_editor import MedalShopEditor
 from ui.monster_points_editor import MonsterPointsEditor
 from ui.styles import app_stylesheet
 from ui.dialogs import InAppEditor, ModeChooser
+
 
 class RengokuWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -60,9 +61,9 @@ class RengokuWindow(QMainWindow):
         font_id = QFontDatabase.addApplicationFont(font_path)
         families = QFontDatabase.applicationFontFamilies(font_id) if font_id != -1 else []
 
-        header = QLabel("Hunting Road Editor", self)
+        header = QLabel("Blaze Road Editor", self)
         header.setAlignment(Qt.AlignCenter)
-        header.setStyleSheet("color: #66CCFF; font-size: 28px; font-weight: bold;")
+        header.setStyleSheet("color: cyan; font-size: 28px; font-weight: bold;")
         header.setObjectName("appHeader")
 
         # 🔹 Apply glow effect
@@ -124,6 +125,11 @@ class RengokuWindow(QMainWindow):
         self.edit_catshop_button.setEnabled(False)
         grid.addWidget(self.edit_catshop_button, 2,1)
 
+        self.edit_medal_button = QPushButton("Edit Tower Medal Shop", self)
+        self.edit_medal_button.clicked.connect(self.open_medal_shop_editor)
+        self.edit_medal_button.setEnabled(False)
+        grid.addWidget(self.edit_medal_button, 3, 1)
+
         # Balance the grid (empty cells where needed)
         grid.addItem(QSpacerItem(0, 0), 2, 1)
         grid.addItem(QSpacerItem(0, 0), 3, 1)
@@ -131,7 +137,7 @@ class RengokuWindow(QMainWindow):
         # About button centered below both columns (spans 2 columns)
         self.help_button = prep(QPushButton("About", self))
         self.help_button.clicked.connect(self.open_help)
-        grid.addWidget(self.help_button, 4, 0)
+        grid.addWidget(self.help_button, 4, 0, 1, 2, alignment=Qt.AlignCenter)
 
         # Make both columns share space evenly
         grid.setColumnStretch(0, 1)
@@ -155,6 +161,7 @@ class RengokuWindow(QMainWindow):
             #successful mhfdat load
             self.edit_points_button.setEnabled(True)
             self.edit_catshop_button.setEnabled(True)
+            self.edit_medal_button.setEnabled(True)
         except Exception as e:
             QMessageBox.critical(self, "Error", f"Failed to parse mhfdat:\n{e}")
             self.edit_points_button.setEnabled(False)
@@ -172,29 +179,55 @@ class RengokuWindow(QMainWindow):
         msg.setTextFormat(Qt.RichText)
         msg.setStandardButtons(QMessageBox.Ok)
         msg.setText("""
-            <h2 style="color:#444;">Blaze Hunting Road Editor</h2>
-            <p><b>Important:</b> Both <code>rengoku_data.bin</code> and <code>mhfdat.bin</code> 
-            must be <u>decompressed</u> before loading.</p>
-            <ul>
-              <li><b>Load Rengoku Data</b> — open <b>rengoku_data.bin</b> to enable the in-app editor and Excel tools.</li>
-              <li><b>Export to Excel</b> — creates an .xlsx with Floor Stats &amp; Spawn Tables, plus helpful key sheets.</li>
-              <li><b>Import from Excel</b> — applies your edited sheet back into a template BIN and saves an updated BIN.</li>
-              <li><b>Open In-App Editor</b> — launches a modal editor (choose Multi or Solo) with neat, editable tables.</li>
-              <li><b>Load mhfdat.bin</b> — open <b>mhfdat.bin</b> (decompressed) to work with Monster Points data.</li>
-              <li><b>Edit Monster Points</b> — enabled after loading mhfdat.bin; lets you edit monster entries and the RoadEntries counter.</li>
+            <h2 style="color:#44ccff; margin-top:0;">Blaze Hunting Road Editor</h2>
+            <p>
+                <b>Welcome!</b> This tool lets you easily view and edit data used in
+                <b>Monster Hunter Frontier’s Hunting Road (Rengoku)</b> and related files.
+            </p>
+            <p style="margin-top:8px;">
+                <b>Note:</b> Make sure both <code>rengoku_data.bin</code> and <code>mhfdat.bin</code>
+                are <u>decompressed</u> before loading.
+            </p>
+            <hr style="margin:12px 0;">
+            <h3 style="color:#44ccff;">Rengoku Data</h3>
+            <ul style="margin-left:18px;">
+                <li><b>Load Rengoku Data</b> — open <code>rengoku_data.bin</code> to unlock all editing features.</li>
+                <li><b>Export to Excel</b> — saves all Floor Stats and Spawn Tables to an easy-to-edit Excel sheet.</li>
+                <li><b>Import from Excel</b> — bring your edited spreadsheet back into the game’s data format.</li>
+                <li><b>In-App Editor</b> — edit directly inside the program with a clean and intuitive table view.</li>
             </ul>
-
-            <p><b>Note:</b> The base Monster Points used in Hunting Road come directly from 
-            <code>mhfdat.bin</code>. To adjust how many points a monster gives, you must edit it through 
-            <b>Load mhfdat.bin</b> → <b>Edit Monster Points</b>.<br>
-            This is important when adding monsters that are not normally present on hunting road.</p>
-
-            <p style="margin-top:15px; font-size:90%; color:#666;">
-              For questions or issues, please visit the project on 
-              <a href="https://github.com/BlazeMH/Blaze-Hunting-Road-Editor">GitHub</a>.
+            <h3 style="color:#44ccff;">MHF Dat</h3>
+            <ul style="margin-left:18px;">
+                <li><b>Load MHF Dat</b> — open <code>mhfdat.bin</code> to unlock all editing features.</li>
+                <li><b>Monster Points Editor</b> — adjust monster IDs, flags, and point values used in Hunting Road.</li>
+                <li><b>Road Cat Shop Editor</b> — edit the Road Cat Shop’s available items:
+                    <ul style="margin-left:18px;">
+                        <li>Add or remove entries safely with automatic counter tracking.</li>
+                        <li>Search for items using the built-in <b>Items List</b> popup.</li>
+                        <li>Supports <b>JSON Export/Import</b> for quick backups and edits.</li>
+                    </ul>
+                </li>
+                <li><b>Tower Medal Shop Editor</b> — customize the Tower Medal Shop (Guild Medal Exchange):
+                    <ul style="margin-left:18px;">
+                        <li>Edit items, flags, and prices directly in the table.</li>
+                        <li>Validation ensures entries are always valid before saving.</li>
+                        <li>Includes <b>JSON Export/Import</b> and an <b>Items List</b> popup.</li>
+                    </ul>
+                </li>
+            </ul>
+            <hr style="margin:12px 0;">
+            <p>
+                <b>Tip:</b> The Hunting Road point rewards shown in-game come from
+                <code>mhfdat.bin</code>. If you add new monsters, remember to adjust
+                their Monster Points there.
+                Also, remember to compress and encrypt all files after editing with the tool, using either rsfrontier or refrontier.
+            </p>
+            <p style="margin-top:10px; font-size:90%; color:#800080;">
+                For help, updates, or community info, visit the project on
+                <a href="https://github.com/BlazeMH/Blaze-Hunting-Road-Editor" style="color:#88ddff;">
+                GitHub</a>.
             </p>
         """)
-
         msg.show()
 
     def open_catshop_editor(self):
@@ -205,6 +238,16 @@ class RengokuWindow(QMainWindow):
         dlg = CatShopEditor(self.mhfdat_path, getattr(self, "mhfdat_parsed", {}), self)
         dlg.exec()
 
+    def open_medal_shop_editor(self):
+        if not getattr(self, "mhfdat_parsed", None):
+            QMessageBox.warning(self, "Error", "No mhfdat data loaded!")
+            return
+
+        dlg = MedalShopEditor(
+            mhfdat_path=self.mhfdat_path,
+            mhfdat_parsed=self.mhfdat_parsed
+        )
+        dlg.exec()
     def load_rengoku_data(self):
         file_path, _ = QFileDialog.getOpenFileName(self, "Open Rengoku Data File", "", "Binary Files (*.bin)")
         if not file_path:

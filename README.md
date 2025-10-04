@@ -1,42 +1,59 @@
 # BlazeRoadEditor
 
-BlazeRoadEditor is a GUI tool designed for editing **Monster Hunter Frontier's Hunting Road (Rengoku)** data.  
-It allows you to view, modify, and export both **Floor Stats** and **Spawn Tables**, and comes with support for Excel integration and an in-app editor.
+BlazeRoadEditor is a GUI tool for editing **Monster Hunter Frontier Z's Hunting Road** data and related systems.  
+It allows you to view, modify, and export both Floor Stats and Spawn Tables, and comes with support for Excel integration and an in-app editor.
 
 ---
 
 ## ✨ Features
-
+### 🔹 Rengoku Data (`rengoku_data.bin`)
 - **Load Rengoku Data**
-  - Open a `rengoku_data.bin` file and parse its contents into structured tables.
-  - Required file must be named `rengoku_data.bin` and decompressed before loading.
-
-- **Monster Points Editor**
-  - Load a decompressed `mhfdat.bin` file using **Load mhfdat.bin**.
-  - Once loaded, the **Edit Monster Points** button will be enabled.
-  - Opens a dedicated in-app table editor for the **Monster Data** block inside `mhfdat.bin`.
-  - Edit monster IDs, flags, base points, and level-based point values directly in the table.
-  - Includes a `RoadEntries` counter field for editing. (This must match directly with the amount of monsters in the points table).
-  - Uses dropdowns and spinboxes for safe, validated editing.
-  - Ensures correct file type by validating the `mhfdat.bin` header before parsing.
-  - Save your changes to a new `mhfdat.bin` while preserving all unrelated data.
+  - Open a decompressed `rengoku_data.bin` file to unlock all editing tools.
+  - Automatically detects valid data and enables the proper features.
 
 - **Export to Excel**
-  - Export Floor Stats and Spawn Tables into an `.xlsx` file.
-  - Automatically includes Monster Key and Spawn Table Key sheets.
+  - Save all Floor Stats and Spawn Tables into an editable `.xlsx` file.
+  - Automatically includes Monster Key and Spawn Table Key sheets for quick reference.
 
 - **Import from Excel**
-  - Edit the exported Excel file and import changes back into a template BIN file.
-  - Writes your modifications directly into a new BIN.
+  - Load your edited Excel file and apply the changes back into a new BIN.
+  - Keeps all formatting and structure intact.
 
 - **In-App Editor**
-  - Choose to edit **Multi Road** or **Solo Road**.
-  - Edit Floor Stats and Spawn Tables directly in a modern table interface.
-  - Cell editing is supported with dropdowns, spinboxes, and validation.
-  - Variant Flags viewer included (shows monster variant details).
-  - Extra Details viewer (loads bundled or external `extra_details.xlsx`).
+  - Choose between **Multi Road** or **Solo Road** mode.
+  - Edit Floor Stats and Spawn Tables directly within the tool.
+  - Includes dropdowns, spinboxes, and automatic validation for safety.
+  - Optional **Variant Flags** and **Extra Details** viewers for quick monster info.
+
 ---
 
+### 🔹 MHF Dat (`mhfdat.bin`)
+- **Load MHF Dat**
+  - Open a decompressed `mhfdat.bin` file to unlock all editing tools.
+  - Automatically detects valid data and enables the proper features.
+
+- **Monster Points Editor**
+  - Adjust monster IDs, flags, and base point values used by the Hunting Road.
+  - Includes a `RoadEntries` counter (keeps track of total monsters listed).
+  - Built-in validation and dropdowns for safe editing.
+  - Saves to a new BIN while preserving all unrelated data.
+
+- **Road Cat Shop Editor**
+  - Edit the **Road Cat Item Shop** in an easy-to-use table format.
+  - Columns: **Item ID**, **Item Name**, **Item ID2**, **Item Name2** (auto-loaded from `Items.xlsx`).
+  - Add or delete entries safely — the counter updates automatically.
+  - Includes a searchable **Items List** popup for browsing items.
+  - Supports **JSON Export/Import** for quick batch edits.
+  - Automatically updates pointers and counters when saving.
+
+- **Tower Medal Shop Editor**
+  - Edit the **Tower Medal Shop** entries directly from `mhfdat.bin`.
+  - Columns: **Item ID**, **Item Name**, **Flag1**, **Flag2**, and **Price**.
+  - `Flag1` is always fixed to `4` after import/saving (read-only); `Flag2` is kept at `1`.
+  - Quantity and Price validation ensures all entries are valid before saving.
+  - Add or remove entries easily.
+  - Supports **JSON Export/Import** and includes an **Items List** popup.
+---
 ## 📸 Screenshots
 
 ### Main App View
@@ -48,57 +65,66 @@ It allows you to view, modify, and export both **Floor Stats** and **Spawn Table
 ### Monster Points Editor
 ![Monster Editor](docs/monster_editor.png)
 
+### Road Cat Shop Editor
+![Cat Shop](docs/catshop_editor.png)
+
+### Tower Medal Shop Editor
+![Medal Shop](docs/medalshop_editor.png)
+
 ---
 
 ## 📖 How to Use
 
 1. **Load a BIN file**
-   - Click **Load Rengoku Data** and select a valid, decompressed `rengoku_data.bin`.
-   - Once loaded, the other buttons will become available.
+   - Click **Load Rengoku Data** for `rengoku_data.bin`, or  
+     **Load mhfdat.bin** for the related editors.
+   - The relevant buttons will unlock once a valid file is loaded.
 
-2. **Export to Excel**
-   - Click **Export to Excel** to save an editable `.xlsx` file.
-   - Open this file in Excel (or Google Sheets) to make modifications.
+2. **Export to Excel** *(Rengoku only)*
+   - Click **Export to Excel** to generate an editable `.xlsx` file.
+   - Use Excel or Google Sheets to modify the data.
 
-3. **Import from Excel**
-   - After editing your Excel, click **Import from Excel**.
-   - Choose the `.xlsx` file, then provide a template BIN.
-   - The program will output a new BIN with your changes applied.
+3. **Import from Excel** *(Rengoku only)*
+   - After editing, click **Import from Excel** and choose your file.
+   - The program writes changes back into a new BIN safely.
 
 4. **Open In-App Editor**
-   - Click **Open In-App Editor** → select Multi or Solo.
-   - Floor Stats and Spawn Tables will be displayed in two sections.
-   - Edit cells directly
-   - Use the **Save Changes to BIN** button to export modifications.
-   - Use **Variant Flags** to view monster variant notes.
-   - Use **Extra Details** to see the formatted details sheet.
+   - Edit directly inside BlazeRoadEditor without needing Excel.
+   - Choose Multi or Solo mode to view Floor Stats and Spawn Tables.
+   - Use **Save Changes to BIN** to apply updates immediately.
 
-5. **Monster Points Workflow**
-   - Load a decompressed `mhfdat.bin`.
-   - Click **Edit Monster Points** to adjust monster base points and RoadEntries.
-   - Remember: the **base Monster Points used in Hunting Road are taken directly from mhfdat.bin**, so editing this file is required when adding monsters not normally present.
+5. **Monster Points Editor (mhfdat.bin)**
+   - Adjust monster base points, flags, and RoadEntries.
+   - Essential when adding monsters that don’t normally appear on Hunting Road.
 
-6. **About Button**
-   - Displays quick instructions and feature summary inside the program.
+6. **Road Cat Shop Editor (mhfdat.bin)**
+   - Manage Cat Shop entries.
+   - Add or delete rows, search items, and export/import JSON.
+
+7. **Tower Medal Shop Editor (mhfdat.bin)**
+   - Manage Medal Shop entries with editable item IDs and prices.
+   - Flag values are fixed for consistency.
+   - Supports JSON export/import for quick bulk edits.
+
+8. **About Button**
+   - Shows an overview of all features and quick usage tips directly inside the app.
 
 ---
 
 ## 🙌 Conclusion
 
-The goal of this tool is to provide a resource for editing Hunting Road data and to make the process more accessible for anyone interested in experimenting with it.  
-Any additional details, feedback, or contributions from the community are greatly appreciated.
+BlazeRoadEditor is built to make **Hunting Road and related data editing** simple, visual, and safe.  
+It’s designed for modders, researchers, and community developers who want to explore Monster Hunter Frontier’s data structure in an accessible way.
 
-If you encounter questions or issues, please visit the GitHub repository:  
+For questions, issues, or community collaboration, visit the GitHub repository:  
 [https://github.com/BlazeMH/Blaze-Hunting-Road-Editor](https://github.com/BlazeMH/Blaze-Hunting-Road-Editor)
 
 ---
 
 ## 🎖️ Credits
 
-Thanks to these individuals for assisting with the project:
+Special thanks to those who helped with development and testing:
 
-- [Brentdbr](https://github.com/Brentdbr) — for providing initial help on the outline of Hunting Road data and floor mapping patterns.  
-- [ezemania2](https://github.com/ezemania2) — for testing.  
-- **Sera** — for testing.  
-
----
+- [Brentdbr](https://github.com/Brentdbr) — for outlining the Hunting Road data structure.  
+- [ezemania2](https://github.com/ezemania2) — for testing and feedback.  
+- **Sera** — for continued testing and input.  
